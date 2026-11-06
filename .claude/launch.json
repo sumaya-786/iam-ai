@@ -1,0 +1,6 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "pehchaan", "runtimeExecutable": "node", "runtimeArgs": ["server.js", "--demo"], "port": 7420 }
+  ]
+}

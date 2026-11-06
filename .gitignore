@@ -1,0 +1,11 @@
+# Runtime state. Contains the Authority's private signing key, Genesis's private key and the
+# break-glass token: never commit.
+data/
+
+# Identities created by the CLI / SDK (contain private keys)
+publisher.json
+agent-*.json
+
+node_modules/
+*.log
+.DS_Store

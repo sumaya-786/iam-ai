@@ -1,0 +1,29 @@
+{
+  "name": "pehchaan-sdk",
+  "version": "0.1.0",
+  "description": "Licences for AI agents, issued by the Pehchaan Authority. Get a licence for your agent, or verify the licence of any agent that calls you.",
+  "main": "index.js",
+  "files": [
+    "index.js",
+    "agent.js",
+    "authority.js",
+    "publisher.js",
+    "core.js",
+    "cli.js"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "ai-agents",
+    "identity",
+    "iam",
+    "licence",
+    "governance"
+  ],
+  "license": "UNLICENSED",
+  "private": true,
+  "bin": {
+    "pehchaan": "cli.js"
+  }
+}

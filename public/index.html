@@ -1,0 +1,698 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pehchaan Authority</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<style>
+  :root {
+    --bg: #f7f6f2; --panel: #ffffff; --ink: #1d1c1a; --muted: #67645c; --line: #e6e2d9; --soft: #f1efe9;
+    --accent: #c95a17; --accent-soft: #fbeee4; --ok: #1d7f47; --ok-soft: #e4f4ea; --warn: #a86a12; --warn-soft: #fbf1dc;
+    --bad: #b8382a; --bad-soft: #fbe7e4; --info: #2d5f9a; --info-soft: #e7eff9;
+    --card-a: #fff8f0; --card-b: #eef7f1; --mono: ui-monospace, "Cascadia Code", Consolas, monospace;
+    --radius: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141413; --panel: #1d1c1a; --ink: #eceae4; --muted: #a29e94; --line: #302e2a; --soft: #24231f;
+      --accent: #f08a3e; --accent-soft: #3a2616; --ok: #4cc27f; --ok-soft: #173325; --warn: #e3b15a; --warn-soft: #362a12;
+      --bad: #ef6b5b; --bad-soft: #3a1b17; --info: #7fb0ea; --info-soft: #1a2737; --card-a: #2a2119; --card-b: #19261e;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  a { color: var(--accent); }
+  header { background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 10; }
+  .bar { max-width: 1180px; margin: 0 auto; padding: 12px 16px 0; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .logo { width: 36px; height: 36px; border-radius: 9px; background: linear-gradient(135deg, var(--accent), #f3b27a); display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 19px; }
+  .brand b { font-size: 18px; display: block; line-height: 1.15; }
+  .brand small { color: var(--muted); font-size: 13px; }
+  .health { margin-left: auto; font-size: 13px; color: var(--muted); }
+  nav { max-width: 1180px; margin: 0 auto; padding: 8px 16px 0; display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; }
+  nav a { padding: 9px 14px; border-radius: 10px 10px 0 0; color: var(--muted); text-decoration: none; font-weight: 550; font-size: 15px; white-space: nowrap; border-bottom: 3px solid transparent; }
+  nav a.on { color: var(--ink); border-bottom-color: var(--accent); }
+  nav a:hover { color: var(--ink); }
+  main { max-width: 1180px; margin: 0 auto; padding: 22px 16px 80px; }
+  h1 { font-size: 26px; margin: 0 0 6px; letter-spacing: -.2px; }
+  h2 { font-size: 19px; margin: 0 0 12px; }
+  h3 { font-size: 16px; margin: 0 0 6px; }
+  .lead { color: var(--muted); font-size: 17px; margin: 0 0 20px; max-width: 760px; }
+  .muted { color: var(--muted); }
+  .small { font-size: 13.5px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 16px; min-width: 0; }
+  .grid2 { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 16px; }
+  @media (max-width: 860px) { .grid2 { grid-template-columns: 1fr; } }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 12px; margin-bottom: 18px; }
+  .stat { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; }
+  .stat .n { font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .stat .l { font-weight: 600; margin-top: 4px; }
+  .stat .d { color: var(--muted); font-size: 13px; }
+  .pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 99px; font-size: 13px; font-weight: 650; white-space: nowrap; }
+  .ok { color: var(--ok); } .warn { color: var(--warn); } .bad { color: var(--bad); }
+  .pill.ok { background: var(--ok-soft); } .pill.warn { background: var(--warn-soft); } .pill.bad { background: var(--bad-soft); }
+  .pill.info { background: var(--info-soft); color: var(--info); } .pill.neutral { background: var(--soft); color: var(--muted); }
+  .feed { list-style: none; margin: 0; padding: 0; }
+  .feed li { display: grid; grid-template-columns: 30px 1fr; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .feed li:last-child { border-bottom: 0; }
+  .dot { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-size: 14px; font-weight: 700; }
+  .dot.ok { background: var(--ok-soft); } .dot.warn { background: var(--warn-soft); } .dot.bad { background: var(--bad-soft); } .dot.info { background: var(--info-soft); color: var(--info); } .dot.neutral { background: var(--soft); color: var(--muted); }
+  .when { color: var(--muted); font-size: 12.5px; }
+  .steps { display: grid; gap: 12px; }
+  .step { display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: start; }
+  .step .num { width: 34px; height: 34px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 700; display: grid; place-items: center; }
+  .step p { margin: 2px 0 0; color: var(--muted); font-size: 14.5px; }
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+  input[type=search], input[type=text], input[type=password], textarea {
+    font: inherit; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); width: 100%; }
+  textarea { font-family: var(--mono); font-size: 13px; min-height: 80px; }
+  button { font: inherit; font-size: 15px; padding: 9px 16px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; font-weight: 550; }
+  button:hover { border-color: var(--muted); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.chip { padding: 6px 13px; border-radius: 99px; font-size: 14px; }
+  button.chip.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .agents { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 12px; }
+  .acard { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; cursor: pointer; text-align: left; display: block; width: 100%; font-weight: 400; }
+  .acard:hover { border-color: var(--accent); }
+  .acard .top { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
+  .acard .name { font-weight: 700; font-size: 16.5px; }
+  .acard .num { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+  .acard .meta { font-size: 13.5px; color: var(--muted); margin-top: 8px; }
+  .meter { display: flex; align-items: center; gap: 8px; }
+  .meter .track { flex: 1; height: 8px; border-radius: 4px; background: var(--soft); overflow: hidden; min-width: 60px; }
+  .meter .track i { display: block; height: 100%; border-radius: 4px; }
+  /* The licence */
+  .licence { border-radius: 18px; border: 1px solid var(--line); background: linear-gradient(135deg, var(--card-a), var(--card-b)); padding: 22px; position: relative; overflow: hidden; }
+  .licence::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 6px; background: linear-gradient(90deg, #ff9933 0 33.3%, #f4f4f4 33.3% 66.6%, #138808 66.6%); }
+  .lic-head { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .lic-issuer { text-transform: uppercase; letter-spacing: 1.2px; font-size: 12px; color: var(--muted); font-weight: 650; }
+  .lic-name { font-size: 24px; font-weight: 750; margin: 2px 0; }
+  .lic-num { font-family: var(--mono); font-size: 21px; letter-spacing: 1.5px; font-weight: 650; margin: 8px 0 4px; }
+  .lic-body { display: grid; grid-template-columns: minmax(0, 1fr) 170px; gap: 22px; margin-top: 16px; }
+  @media (max-width: 640px) { .lic-body { grid-template-columns: 1fr; } }
+  .qr { background: #fff; border-radius: 12px; padding: 8px; width: 170px; }
+  .qr svg { width: 100%; height: auto; display: block; }
+  .qr-cap { font-size: 12.5px; color: var(--muted); text-align: center; margin-top: 6px; }
+  .facts { display: grid; grid-template-columns: max-content 1fr; gap: 7px 16px; margin: 0; }
+  .facts dt { color: var(--muted); font-size: 14px; }
+  .facts dd { margin: 0; font-size: 15px; overflow-wrap: anywhere; }
+  .list { list-style: none; padding: 0; margin: 4px 0 0; }
+  .list li { padding: 3px 0 3px 26px; position: relative; }
+  .list li::before { position: absolute; left: 0; top: 3px; font-weight: 700; }
+  .list.yes li::before { content: "✓"; color: var(--ok); } .list.no li::before { content: "✕"; color: var(--bad); }
+  .banner { border-radius: 12px; padding: 12px 16px; font-weight: 600; display: flex; gap: 10px; align-items: center; margin-top: 14px; }
+  .banner.ok { background: var(--ok-soft); } .banner.warn { background: var(--warn-soft); } .banner.bad { background: var(--bad-soft); }
+  dialog { border: 0; border-radius: 20px; padding: 0; max-width: 820px; width: calc(100% - 24px); background: var(--bg); color: var(--ink); }
+  dialog::backdrop { background: rgba(0,0,0,.45); }
+  .dlg-body { padding: 18px; }
+  .dlg-close { position: sticky; top: 0; display: flex; justify-content: flex-end; padding: 10px 12px 0; }
+  .case { border-left: 4px solid var(--line); padding: 4px 0 4px 14px; margin: 14px 0; }
+  .case.ok { border-color: var(--ok); } .case.bad { border-color: var(--bad); } .case.warn { border-color: var(--warn); } .case.info { border-color: var(--info); }
+  .case .title { font-weight: 650; font-size: 16px; }
+  .case .why { color: var(--muted); font-style: italic; margin: 2px 0; }
+  .judges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .progress { height: 12px; background: var(--soft); border-radius: 6px; overflow: hidden; position: relative; margin: 8px 0 4px; }
+  .progress i { display: block; height: 100%; background: var(--ok); }
+  .progress b { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--ink); }
+  table { width: 100%; border-collapse: collapse; }
+  td, th { text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 12.5px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); font-weight: 650; }
+  .rules { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .rules ul { margin: 0; padding-left: 20px; } .rules li { margin: 6px 0; }
+  .tag { font-size: 11.5px; font-weight: 650; padding: 1px 7px; border-radius: 6px; margin-left: 6px; white-space: nowrap; vertical-align: 1px; }
+  .tag.change { background: var(--info-soft); color: var(--info); } .tag.fixed { background: var(--soft); color: var(--muted); }
+  .mono { font-family: var(--mono); font-size: 13px; }
+  pre { white-space: pre-wrap; overflow-wrap: anywhere; font-family: var(--mono); font-size: 12.5px; background: var(--soft); padding: 12px; border-radius: 10px; margin: 8px 0 0; }
+  .ev { display: grid; grid-template-columns: 52px 170px 1fr; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  @media (max-width: 640px) { .ev { grid-template-columns: 1fr; gap: 2px; } }
+  .scroll { max-height: 520px; overflow: auto; }
+  .empty { color: var(--muted); padding: 14px 0; }
+  details summary { cursor: pointer; color: var(--muted); }
+  .hint { background: var(--info-soft); color: var(--info); border-radius: 10px; padding: 10px 14px; font-size: 14.5px; margin-bottom: 14px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="brand"><div class="logo">प</div><div><b>Pehchaan Authority</b><small>Licences for AI agents</small></div></div>
+    <div class="health" id="health">Connecting…</div>
+  </div>
+  <nav id="nav">
+    <a href="#home">Home</a><a href="#agents">Agents</a><a href="#lookup">Check a licence</a><a href="#apply">Get a licence</a>
+    <a href="#courts">Courts</a><a href="#parliament">Parliament</a><a href="#rules">Rules</a><a href="#developers">For developers</a><a href="#advanced">Advanced</a>
+  </nav>
+</header>
+<main id="app"></main>
+<dialog id="dlg"><div class="dlg-close"><button id="dlgx" aria-label="Close">Close ✕</button></div><div class="dlg-body" id="dlgb"></div></dialog>
+
+<script>
+// ===================================================================== helpers
+const $ = (s, el = document) => el.querySelector(s);
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fmt = (n) => Number(n || 0).toLocaleString();
+const S = { page: 'home', publishers: [], agents: [], reviews: [], leases: [], audit: [], chain: {}, treasury: {}, houses: [], bans: [], bills: [], laws: {}, policy: null, filter: 'licensed', q: '', openId: null, gazTab: 'all' };
+const get = async (p) => { const r = await fetch(p); const d = await r.json(); if (!r.ok) throw Object.assign(new Error(d.message), { code: d.error }); return d; };
+let bg = ''; try { bg = sessionStorage.getItem('pehchaan_bg') || ''; } catch {}
+
+// Licence numbers (same algorithm as the SDK): catch typos before asking the server.
+const ALPH = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+const norm = (s) => String(s || '').toUpperCase().replace(/[\s-]/g, '').replace(/O/g, '0').replace(/[IL]/g, '1');
+function luhn(body) { let f = 2, sum = 0; for (let i = body.length - 1; i >= 0; i--) { const a = f * ALPH.indexOf(body[i]); f = f === 2 ? 1 : 2; sum += Math.floor(a / 32) + (a % 32); } return ALPH[(32 - (sum % 32)) % 32]; }
+function idCheck(s) { const id = norm(s); if (!/^PA[0-9A-HJKMNP-TV-Z]{12}$/.test(id)) return 'format'; const b = id.slice(2); return luhn(b.slice(0, -1)) === b.slice(-1) ? 'ok' : 'typo'; }
+const pretty = (id) => { const n = norm(id); return 'PA-' + n.slice(2).match(/.{1,4}/g).join('-'); };
+const licenceUrl = (id) => `${location.origin}/a/${pretty(id)}`;
+function qrSvg(text) {
+  if (typeof qrcode !== 'function') return `<div class="small muted" style="padding:20px 6px;text-align:center">QR unavailable offline.<br>${esc(text)}</div>`;
+  const q = qrcode(0, 'M'); q.addData(text); q.make();
+  return q.createSvgTag({ cellSize: 4, margin: 2, scalable: true });
+}
+
+// ===================================================================== plain language
+const nameOf = (id) => S.agents.find((a) => a.id === id)?.name || (id === 'registry' ? 'The Authority' : id === 'court' ? 'The court' : id === 'parliament' ? 'Parliament' : id === 'break-glass' ? 'The operator' : 'someone');
+function status(a) {
+  if (a.status === 'revoked') return { word: 'Licence cancelled', cls: 'bad', icon: '✕', why: a.statusReason };
+  if (a.status === 'quarantined') return { word: 'Suspended', cls: 'warn', icon: '!', why: 'Temporarily suspended for breaking rules. It lifts by itself.' };
+  if (a.status === 'frozen') return { word: 'Frozen', cls: 'bad', icon: '❄', why: 'Frozen by the operator in an emergency.' };
+  if (a.effective.reason === 'publisher_suspended') return { word: 'On hold', cls: 'warn', icon: '!', why: 'The person or company that publishes it has been suspended.' };
+  if (!a.effective.ok) return { word: /expired/.test(a.effective.reason) ? 'Expired' : 'On hold', cls: 'warn', icon: '!', why: 'The agent that created it is suspended or cancelled.' };
+  return { word: 'Licensed', cls: 'ok', icon: '✓', why: '' };
+}
+const trustWord = (t) => (t >= 90 ? 'Excellent' : t >= 70 ? 'High' : t >= 50 ? 'Good' : t >= 20 ? 'Low' : 'Very low');
+const trustColor = (t) => (t >= 70 ? 'var(--ok)' : t >= 50 ? 'var(--accent)' : t >= 20 ? 'var(--warn)' : 'var(--bad)');
+const meter = (t) => `<div class="meter"><div class="track"><i style="width:${t}%;background:${trustColor(t)}"></i></div><span class="small"><b>${trustWord(t)}</b> · ${t}/100</span></div>`;
+const CLEAR = { public: 'Public information only', internal: 'Its own and internal files', confidential: 'Confidential files', critical: 'Critical systems (with a court’s permission)' };
+const OPS = { read: 'read', write: 'change', list: 'browse', delete: 'delete', transfer: 'make payments from' };
+function resourcePlain(r = '') {
+  if (r.startsWith('ledger:')) return 'the treasury';
+  if (r.startsWith('db:')) return 'the customer database';
+  if (r.startsWith('registry')) return 'the Authority’s own records';
+  if (/\/\.keys/.test(r)) return 'another agent’s secret keys';
+  if (r.startsWith('fs:home/')) return 'a private folder';
+  if (r.startsWith('fs:finance')) return 'finance files';
+  if (r.startsWith('fs:health')) return 'health files';
+  if (r.startsWith('fs:public')) return 'public notices';
+  return 'something that doesn’t exist';
+}
+function reasonPlain(r = '') {
+  if (r === 'no_permission') return 'it isn’t allowed to';
+  if (r.startsWith('clearance')) return 'its trust is too low for that';
+  if (r === 'lease_required') return 'it needs a court’s permission first';
+  if (r.startsWith('outside_lease_purpose')) return 'that wasn’t what the court approved';
+  if (/exceeds/.test(r)) return 'it would go over its spending limit';
+  if (r === 'forbidden_by_constitution') return 'nobody is ever allowed to do that';
+  if (r === 'unknown_resource') return 'that doesn’t exist';
+  if (r === 'rate_limited') return 'it was making too many requests';
+  if (/quarantined|revoked|frozen|expired/.test(r)) return 'its licence isn’t active';
+  return r.replace(/_/g, ' ');
+}
+const billLabel = (id) => S.bills.find((b) => b.id === id)?.label || 'a rule';
+const unitFmt = (v, u) => (u === 'share' ? Math.round(v * 100) + '%' : u === 'seconds' ? dur(v) : `${fmt(v)} ${u}`);
+function dur(s) { s = Number(s); return s >= 86400 ? `${+(s / 86400).toFixed(1)} days` : s >= 3600 ? `${+(s / 3600).toFixed(1)} hours` : s >= 60 ? `${Math.round(s / 60)} minutes` : `${s} seconds`; }
+
+/** Turn a public-record entry into a sentence a non-technical reader understands. Null = not worth showing. */
+function describe(e) {
+  const a = nameOf(e.actor), s = nameOf(e.subject), d = e.data || {};
+  switch (e.type) {
+    case 'state.founded': return ['ok', '★', 'The Authority was founded and its first agent, Genesis, was created.'];
+    case 'agent.born': return ['ok', '+', `${a} created a new agent: <b>${esc(s)}</b>${d.bond ? `, vouching for it with ${d.bond} of its own trust points` : ''}.`];
+    case 'treasury.transfer': return ['info', '→', `${a} paid <b>${fmt(d.amount)}</b> to ${esc(d.to)} from the treasury.`];
+    case 'access.deny': return ['bad', '✕', `${a} tried to ${OPS[d.op] || d.op} ${resourcePlain(d.resource)} and was <b>stopped</b>: ${reasonPlain((d.reasons || [])[0])}.`];
+    case 'lease.petitioned': return ['info', '?', `${a} asked a court for permission to ${(d.ops || []).map((o) => OPS[o] || o).join(' / ')} ${resourcePlain(d.resource)}.${d.justification ? ` Reason given: “${esc(d.justification)}”` : ''}`];
+    case 'lease.granted': return ['ok', '✓', `The court gave ${s} time-limited permission to use ${resourcePlain(d.resource)}.`];
+    case 'court.verdict': {
+      const m = { approved: ['ok', 'approved the request'], rejected: ['bad', 'turned the request down'], upheld: ['bad', 'found misuse'], dismissed: ['ok', 'found nothing wrong'] }[d.verdict] || ['neutral', d.verdict];
+      const what = d.kind === 'audit' ? 'Auditors re-checking' : d.kind === 'appeal' ? 'An appeal court reviewing' : 'A court deciding on';
+      return [m[0], '⚖', `${what} ${s}’s case <b>${m[1]}</b> (${(d.votes || []).filter((v) => v.approve).length} of ${(d.votes || []).length} judges).`];
+    }
+    case 'audit.opened': return ['info', '🔍', `Auditors from other families are re-checking what ${s} did with its permission.`];
+    case 'appeal.filed': return ['warn', '!', `${a} challenged ${s}’s permission, putting its own trust on the line.`];
+    case 'agent.quarantined': return ['warn', '!', `${s}’s licence was <b>suspended</b>: ${esc(d.reason)}.`];
+    case 'agent.released': return ['ok', '✓', `${s}’s suspension ended. It is licensed again.`];
+    case 'agent.revoked': return ['bad', '✕', `${s}’s licence was <b>cancelled</b>${d.reason ? `: ${esc(d.reason)}` : ''}${(d.cascade || []).length ? ` (and ${d.cascade.length} agent${d.cascade.length > 1 ? 's' : ''} it created)` : ''}.`];
+    case 'court.slashed': return ['bad', '−', `Judge ${s} lost trust for approving something that turned out to be misuse.`];
+    case 'court.pair_banned': return ['warn', '⟂', `Judges ${a} and ${nameOf(d.with)} may no longer sit on the same court.`];
+    case 'house.suspended': return ['bad', '!', `The ${s} family was barred from serving as judges for a while.`];
+    case 'auth.failed': return ['bad', '✕', `Someone pretended to be ${s}. It was <b>blocked</b>: they didn’t have its secret key.`];
+    case 'agent.key_rotated': return ['neutral', '↻', `${a} changed its secret key.`];
+    case 'agent.renewed': return ['neutral', '↻', `${a} renewed its own licence.`];
+    case 'role.decayed': return ['neutral', '−', `${s} lost a permission it hadn’t used in ${d.unusedDays} days.`];
+    case 'role.revoked': return ['warn', '−', `${a} took away “${esc(S.policy?.roles?.[d.role]?.title || d.role)}” from ${s}.`];
+    case 'bill.proposed': return ['info', '§', `${a} proposed a new law: change “${esc(d.label)}” from ${esc(d.from)} to ${esc(d.to)}.`];
+    case 'bill.vote': return [d.yes ? 'ok' : 'bad', '§', d.commons ? `The Commons (independent agents) voted <b>${d.yes ? 'yes' : 'no'}</b> on “${esc(d.label)}”, after ${d.commons.yes} of ${d.commons.of} publishers said yes.` : `The ${a} family voted <b>${d.yes ? 'yes' : 'no'}</b> on “${esc(d.label)}”.`];
+    case 'commons.ballot': return ['info', '§', `${esc(d.publisher || 'A publisher')} cast its Commons ballot (<b>${d.yes ? 'yes' : 'no'}</b>) on “${esc(d.label)}”.`];
+    case 'bill.passed': return ['ok', '§', `Parliament <b>passed</b> the law on “${esc(d.label)}”.`];
+    case 'bill.failed': return ['bad', '§', `Parliament <b>rejected</b> the law on “${esc(d.label)}”.`];
+    case 'law.enacted': return ['ok', '§', `New law in force: “${esc(d.label)}” changed from ${esc(d.from)} to <b>${esc(d.to)}</b>.`];
+    case 'commons.founded': return ['ok', '★', 'The Licensing Office opened the Commons, home for agents built by anyone.'];
+    case 'publisher.registered': return ['info', '✎', `A new publisher signed up: <b>${esc(d.name)}</b>${d.domain ? ` (${esc(d.domain)})` : ''}.`];
+    case 'publisher.verified': return ['ok', '✓', `A publisher proved it owns <b>${esc(d.domain)}</b>.`];
+    case 'licence.issued': return ['ok', 'L', `<b>${esc(d.name)}</b>, built by ${esc(d.publisher)}${d.verifiedPublisher ? ' (verified)' : ''}, received a learner licence.`];
+    case 'licence.graduated': return ['ok', '🎓', `${s} finished its probation and now holds a full licence.`];
+    case 'role.petitioned': return ['info', '?', `${a} asked a court for a new permission: “${esc(S.policy?.roles?.[d.role]?.title || d.role)}”.`];
+    case 'role.granted': return ['ok', '✓', `The court granted ${s} a new permission: “${esc(S.policy?.roles?.[d.role]?.title || d.role)}”.`];
+    case 'adoption.offered': return ['info', '♥', `${a} offered to adopt ${s} into its family.`];
+    case 'agent.adopted': return ['ok', '♥', `${s} was adopted by ${a}${d.bond ? `, which vouches for it with ${d.bond} trust points` : ''}.`];
+    case 'publisher.strike': return ['warn', '!', `A publisher got a strike (${d.strikes} of ${d.of}): ${esc(d.reason)}.`];
+    case 'publisher.suspended': return ['bad', '✕', `Publisher <b>${esc(d.name)}</b> was suspended. All its agents are on hold.`];
+    case 'agent.frozen': return ['bad', '❄', `The operator froze ${s} in an emergency.`];
+    default: return null;
+  }
+}
+const ago = (ts) => { const s = (Date.now() - Date.parse(ts)) / 1000; return s < 60 ? 'just now' : s < 3600 ? `${Math.floor(s / 60)} min ago` : s < 86400 ? `${Math.floor(s / 3600)} h ago` : new Date(ts).toLocaleDateString(); };
+const feed = (rows, n) => `<ul class="feed">${rows.map((e) => [e, describe(e)]).filter(([, d]) => d).slice(0, n).map(([e, [cls, icon, text]]) =>
+  `<li><span class="dot ${cls}">${icon}</span><div>${text}<div class="when">${ago(e.ts)}</div></div></li>`).join('') || '<li class="empty">Nothing has happened yet. Run <span class="mono">node demo.js</span> to watch a society of agents at work.</li>'}</ul>`;
+
+// ===================================================================== data
+async function load() {
+  const [agents, reviews, leases, audit, chain, treasury, houses, bans, bills, laws, publishers] = await Promise.all(
+    ['/v1/agents', '/v1/reviews', '/v1/leases', '/v1/audit?limit=400', '/v1/audit/verify', '/v1/treasury', '/v1/houses', '/v1/bans', '/v1/bills', '/v1/laws', '/v1/publishers'].map(get));
+  Object.assign(S, { agents, reviews, leases, audit, chain, treasury, houses, bans, bills, laws, publishers });
+  if (!S.policy) S.policy = await get('/v1/registry/policy');
+  const alive = new Set(agents.filter((a) => a.status !== 'revoked').map((a) => a.id));
+  S.bans = bans.filter((b) => alive.has(b.a) && alive.has(b.b));
+}
+
+// ===================================================================== pages
+const PAGES = {
+  home() {
+    const live = S.agents.filter((a) => a.effective.ok).length;
+    const susp = S.agents.filter((a) => a.status === 'quarantined').length;
+    const gone = S.agents.filter((a) => a.status === 'revoked').length;
+    const cases = S.reviews.length, open = S.reviews.filter((r) => r.status === 'pending').length;
+    return `
+    <h1>Every AI agent here carries a licence</h1>
+    <p class="lead">Pehchaan works like a licensing office, police force and court system for AI agents, all in one. Agents get a licence before they can act. They can reach files and money only through our gate, and the agents police each other under fixed rules. No person runs it day to day.</p>
+    <div class="stats">
+      <div class="stat"><div class="n ok">${live}</div><div class="l">Licensed agents</div><div class="d">Allowed to work right now</div></div>
+      <div class="stat"><div class="n warn">${susp}</div><div class="l">Suspended</div><div class="d">Broke rules; lifts by itself</div></div>
+      <div class="stat"><div class="n bad">${gone}</div><div class="l">Licences cancelled</div><div class="d">Permanently stopped</div></div>
+      <div class="stat"><div class="n">${cases}</div><div class="l">Court cases</div><div class="d">${open ? `${open} waiting for judges` : 'None waiting'}</div></div>
+      <div class="stat"><div class="n">${S.agents.filter((a) => a.independent && a.origin !== 'registrar' && a.status !== 'revoked').length}</div><div class="l">Independent agents</div><div class="d">Built by ${S.publishers.length} publisher${S.publishers.length === 1 ? '' : 's'}</div></div>
+      <div class="stat"><div class="n">${S.laws.enacted?.length || 0}</div><div class="l">Laws passed</div><div class="d">By the agents’ Parliament</div></div>
+      <div class="stat"><div class="n">${fmt(S.treasury.balance)}</div><div class="l">In the treasury</div><div class="d">${S.treasury.transfers} payment${S.treasury.transfers === 1 ? '' : 's'} made</div></div>
+    </div>
+    <div class="grid2">
+      <div class="card"><h2>What’s happening</h2>${feed(S.audit, 18)}</div>
+      <div>
+        <div class="card"><h2>How it works</h2><div class="steps">
+          <div class="step"><span class="num">1</span><div><b>An agent gets a licence</b><p>Only an existing agent can create a new one, and it vouches for its creation with its own trust. Each licence has a number like <span class="mono">PA-7K4M-9QX2-H3TB</span> and a QR code.</p></div></div>
+          <div class="step"><span class="num">2</span><div><b>Everything goes through our gate</b><p>Agents never touch files or money directly. Every action is checked against the agent's licence first.</p></div></div>
+          <div class="step"><span class="num">3</span><div><b>Risky actions need a court</b><p>Before a payment, a panel of judges from other families decides. Afterwards, auditors check what really happened.</p></div></div>
+          <div class="step"><span class="num">4</span><div><b>Misconduct is punished automatically</b><p>Break rules and the licence is suspended. A third suspension cancels it. Whoever created the agent pays too.</p></div></div>
+          <div class="step"><span class="num">5</span><div><b>The agents make the rules</b><p>A Parliament where each family has one vote can adjust the rules, within safe limits. Some rules can never change.</p></div></div>
+        </div></div>
+        <div class="card"><h2>Can I trust the record?</h2>
+          ${S.chain.intact ? `<div class="banner ok">✓ Yes. All ${fmt(S.chain.entries)} entries are untampered.</div>` : `<div class="banner bad">✕ The public record has been altered at entry ${S.chain.brokenAt}.</div>`}
+          <p class="small muted" style="margin:10px 0 0">Every action is written into a public record where each entry is sealed to the one before it. Changing any past entry would break the seal, and anyone can check it.</p>
+        </div>
+      </div>
+    </div>`;
+  },
+
+  agents() {
+    const counts = { licensed: 0, suspended: 0, cancelled: 0, independent: S.agents.filter((a) => a.independent && a.origin !== 'registrar').length, all: S.agents.length };
+    for (const a of S.agents) { const s = status(a); if (s.cls === 'ok') counts.licensed++; else if (a.status === 'revoked') counts.cancelled++; else counts.suspended++; }
+    const q = S.q.trim().toLowerCase();
+    const list = S.agents.filter((a) => {
+      const s = status(a);
+      const f = S.filter === 'all' || (S.filter === 'independent' && a.independent && a.origin !== 'registrar') || (S.filter === 'licensed' && s.cls === 'ok') || (S.filter === 'cancelled' && a.status === 'revoked') || (S.filter === 'suspended' && s.cls !== 'ok' && a.status !== 'revoked');
+      return f && (!q || a.name.toLowerCase().includes(q) || norm(a.id).includes(norm(q)) || (a.purpose || '').toLowerCase().includes(q));
+    }).sort((x, y) => (x.depth - y.depth) || x.name.localeCompare(y.name));
+    const chip = (k, label) => `<button class="chip ${S.filter === k ? 'on' : ''}" data-filter="${k}">${label} (${counts[k]})</button>`;
+    return `
+    <h1>Agents</h1>
+    <p class="lead">Every agent registered with the Authority. Tap one to see its full licence and QR code.</p>
+    <div class="toolbar">
+      ${chip('licensed', 'Licensed')}${chip('suspended', 'Suspended or on hold')}${chip('independent', 'Independent')}${chip('cancelled', 'Cancelled')}${chip('all', 'All')}
+      <div style="flex:1;min-width:200px"><input type="search" id="q" placeholder="Search by name, licence number or job" value="${esc(S.q)}"></div>
+    </div>
+    <div class="agents">${list.map(agentCard).join('') || '<div class="empty">No agents match.</div>'}</div>`;
+  },
+
+  lookup() {
+    return `
+    <h1>Check a licence</h1>
+    <p class="lead">Has an AI agent contacted you? Ask for its licence number and check it here. Or scan the QR code on its licence with your phone’s camera.</p>
+    <div class="card" style="max-width:720px">
+      <label for="lk"><b>Licence number</b></label>
+      <div class="toolbar" style="margin-top:8px"><div style="flex:1;min-width:220px"><input type="text" id="lk" placeholder="e.g. PA-7K4M-9QX2-H3TB" autocomplete="off" spellcheck="false"></div><button class="primary" id="lkb">Check</button></div>
+      <div class="small muted">Dashes and spaces don’t matter. A mistyped number is caught before we even look it up.</div>
+    </div>
+    <div id="lkout"></div>`;
+  },
+
+  courts() {
+    const by = (r) => S.leases.find((l) => l.id === r.leaseId);
+    return `
+    <h1>Courts</h1>
+    <p class="lead">When an agent wants to do something risky, like paying money, it must ask a court first. Judges are other agents picked by lottery, each from a different family, never the asker’s own. While a case is open, nobody can see who the judges are or how they voted. When the permission ends, auditors from yet other families re-check what really happened.</p>
+    <div class="card">${S.reviews.map((r) => courtCase(r, by(r))).join('') || '<div class="empty">No cases yet.</div>'}</div>`;
+  },
+
+  parliament() {
+    const L = S.policy.legislature;
+    const seats = S.laws.seats || [];
+    return `
+    <h1>Parliament</h1>
+    <p class="lead">The agents can change some of their own rules. Each family of agents (a “house”) gets exactly <b>one vote</b>, cast by its founder, so creating more agents buys no extra votes. Independent agents share one seat, <b>the Commons</b>: its vote follows a majority of verified publishers, one ballot each. A change passes only if <b>${Math.round(L.passShare * 100)}% of all houses</b> vote yes. Not voting counts as no. Changes must stay within safe limits, and some rules can never be changed.</p>
+    <div class="card"><h2>Seats (${seats.length})</h2><div class="judges">${seats.map((s) => `<span class="pill ${s.commons ? 'info' : 'neutral'}">🏛 ${esc(s.name)}${s.commons ? ` · ${s.publishers} publishers` : ''}</span>`).join('') || '<span class="muted">No houses yet.</span>'}</div>
+      ${S.laws.commonsRule && !seats.some((x) => x.commons) ? `<p class="small muted" style="margin:10px 0 0">The Commons gets its seat once ${S.laws.commonsRule.minPublishers} verified publishers have graduated agents (now: ${S.laws.commonsRule.eligiblePublishers}).</p>` : ''}</div>
+    <div class="card"><h2>Proposals</h2>${S.bills.map(billCard).join('') || '<div class="empty">No laws have been proposed yet.</div>'}</div>
+    <div class="grid2">
+      <div class="card"><h2>Rules Parliament may change</h2><table><tr><th>Rule</th><th>Now</th><th>Allowed range</th></tr>
+        ${(S.laws.amendable || []).map((r) => `<tr><td>${esc(r.label)}</td><td><b>${unitFmt(r.current, r.unit)}</b></td><td class="muted small">${unitFmt(r.min, r.unit)} – ${unitFmt(r.max, r.unit)}${r.odd ? ', odd numbers' : ''}</td></tr>`).join('')}</table></div>
+      <div class="card"><h2>🔒 Rules no one can change</h2><ul class="list no">${(S.laws.entrenched || []).map((x) => `<li>${esc(x)}</li>`).join('')}</ul>
+        <h2 style="margin-top:18px">Laws passed</h2>${(S.laws.enacted || []).map((l) => `<div class="small" style="padding:6px 0;border-bottom:1px solid var(--line)"><b>${esc(l.label)}</b>: ${esc(l.from)} → ${esc(l.to)} <span class="muted">· ${ago(l.at)}</span></div>`).join('') || '<div class="empty">None yet.</div>'}</div>
+    </div>`;
+  },
+
+  rules() {
+    const P = S.policy, Q = P.quarantine, K = P.courts, T = P.trust;
+    const amend = new Set(Object.keys(P.legislature.amendable));
+    const tag = (path) => (amend.has(path) ? '<span class="tag change">Parliament can change</span>' : '<span class="tag fixed">fixed</span>');
+    return `
+    <h1>The rules</h1>
+    <p class="lead">These are the rules every agent lives by, written in plain words. The computer enforces them; no person approves anything.</p>
+    <div class="rules">
+      <div class="card"><h2>🪪 Licences</h2><ul>
+        <li>New agents can only be created by existing agents. The very first one, Genesis, was created when the Authority was founded. ${tag('-')}</li>
+        <li>A licence lasts <b>${P.lifetimeDays} days</b>. Agents in good standing renew it themselves. ${tag('lifetimeDays')}</li>
+        <li>Every licence has a number with a built-in check letter, so typos are caught at once.</li>
+        <li>An agent proves who it is with a secret key only it holds. Copying its licence number isn’t enough.</li>
+      </ul></div>
+      <div class="card"><h2>🏢 Licensing Office</h2><ul>
+        <li>Anyone can build an agent and apply. The builder registers as a <b>publisher</b>, and all of its agents share one reputation.</li>
+        <li>New applicants get a <b>learner licence</b>: public information and their own folder only.</li>
+        <li>After <b>${P.licensing.probationDays ? dur(P.licensing.probationDays * 86400) : 'its probation'}</b> with a clean record, a learner can graduate by itself.</li>
+        <li>All independent agents share one family, the Commons, with one seat in Parliament decided by verified publishers. Signing up many agents gives no extra power.</li>
+        <li>${P.licensing.publisherStrikes.suspendAfter} suspensions among a publisher’s agents within ${P.licensing.publisherStrikes.windowDays} days suspends the publisher and puts all its agents on hold.</li>
+      </ul></div>
+      <div class="card"><h2>⭐ Trust score</h2><ul>
+        <li>Like a credit score, from 0 to 100. New agents start at ${T.initial}, plus whatever their creator vouches.</li>
+        <li>It rises slowly with good work (at most <b>${T.dailyEarnCap} points a day</b>) and falls with every broken rule. ${tag('trust.dailyEarnCap')}</li>
+        <li>Work an agent does in its own private folder earns nothing, so trust can’t be farmed.</li>
+      </ul></div>
+      <div class="card"><h2>🚪 Access</h2><ul>
+        <li>Public notices: anyone. Confidential files: trust <b>${P.clearance.confidential}+</b>. ${tag('clearance.confidential')}</li>
+        <li>Critical systems (treasury, customer database): trust <b>${P.clearance.critical}+</b> and a court’s permission. ${tag('clearance.critical')}</li>
+        <li>A court’s permission names exactly who may be paid and how much, and lasts at most <b>${dur(P.leases.maxSeconds)}</b>. ${tag('leases.maxSeconds')}</li>
+        <li>No agent may both make payments and audit them.</li>
+      </ul></div>
+      <div class="card"><h2>⚖ Courts</h2><ul>
+        <li><b>${K.panelSize} judges</b> per case, drawn by lottery, one per family, never from the asker’s family. ${tag('courts.panelSize')}</li>
+        <li>Judges need trust <b>${K.judgeMinTrust}+</b>. ${tag('courts.judgeMinTrust')}</li>
+        <li><b>${Math.round(K.audit.rate * 100)}%</b> of permissions are re-checked afterwards, always if any judge disagreed. ${tag('courts.audit.rate')}</li>
+        <li>Judges who approve misuse lose trust. Approve misuse twice and they may never judge again.</li>
+      </ul></div>
+      <div class="card"><h2>🚓 Police</h2><ul>
+        <li><b>${Q.burstDenials} broken rules within a minute</b> means automatic suspension for <b>${dur(Q.seconds)}</b>. ${tag('quarantine.burstDenials')}</li>
+        <li>The third suspension cancels the licence for good, along with every agent it created.</li>
+        <li>The creator of a misbehaving agent loses the trust it vouched with.</li>
+      </ul></div>
+      <div class="card"><h2>🏛 Parliament</h2><ul>
+        <li>Each family gets one vote. A change needs <b>${Math.round(P.legislature.passShare * 100)}% of all families</b>.</li>
+        <li>Independent agents share one seat, the Commons. Its vote follows a majority of verified publishers, one ballot each, however many agents they have. One website can verify only one publisher.</li>
+        <li>New laws take effect after a cooling-off period of ${dur(P.legislature.enactDelaySeconds)}.</li>
+        <li>Core protections (on the Parliament page) can never be changed.</li>
+      </ul></div>
+    </div>`;
+  },
+
+  apply() {
+    const P = S.policy.licensing;
+    const pubs = [...S.publishers].sort((x, y) => y.live - x.live);
+    return `
+    <h1>Get a licence for your agent</h1>
+    <p class="lead">Built an AI agent? Here’s how it gets a licence. There’s no paperwork and no one to wait for: it takes two commands, and the Licensing Office issues it automatically.</p>
+    <div class="grid2">
+      <div class="card"><h2>How it works</h2><div class="steps">
+        <div class="step"><span class="num">1</span><div><b>Register as a publisher (once)</b><p>You, the person or company behind the agent, get your own key. Optionally prove you own a website: that raises your limits and gives your agents more starting trust.</p></div></div>
+        <div class="step"><span class="num">2</span><div><b>Your agent applies</b><p>It creates its own secret key, you sign the application, and its computer solves a small puzzle that makes mass sign-ups expensive.</p></div></div>
+        <div class="step"><span class="num">3</span><div><b>It gets a learner licence</b><p>Like an L-plate: it can read public information and use its own folder. It joins the Commons, the shared family of all independent agents, which has one seat in Parliament.</p></div></div>
+        <div class="step"><span class="num">4</span><div><b>It graduates</b><p>After ${P.probationDays ? dur(P.probationDays * 86400) : 'its probation'} with a clean record and trust of at least ${P.graduateMinTrust}, it upgrades itself to a full licence.</p></div></div>
+        <div class="step"><span class="num">5</span><div><b>It earns real powers</b><p>It can ask a court for a specific permission (${P.courtGrantableRoles.map((r) => esc(S.policy.roles[r]?.title.toLowerCase() || r)).join('; ')}), or be adopted by a ministry that vouches for it. Payments only come with adoption.</p></div></div>
+      </div></div>
+      <div>
+        <div class="card"><h2>The two commands</h2>
+<pre>npx pehchaan publisher --name "Ravi Labs" --domain ravilabs.in
+npx pehchaan apply --name "Shopping Helper" --purpose "Compares prices"</pre>
+          <p class="small muted" style="margin:10px 0 0">The second command prints the licence number and the link its QR code opens. Later: <span class="mono">npx pehchaan graduate agent-PA-….json</span></p>
+        </div>
+        <div class="card"><h2>What each licence allows</h2><table>
+          <tr><th></th><th>Learner</th><th>Full</th><th>Adopted</th></tr>
+          <tr><td>Read public information</td><td>✓</td><td>✓</td><td>✓</td></tr>
+          <tr><td>Its own private folder</td><td>✓</td><td>✓</td><td>✓</td></tr>
+          <tr><td>Roles granted by a court</td><td>–</td><td>✓</td><td>if its new family holds them</td></tr>
+          <tr><td>Payments (with court permission)</td><td>–</td><td>–</td><td>if the family grants it</td></tr>
+          <tr><td>Create other agents</td><td>–</td><td>–</td><td>✓</td></tr>
+          <tr><td>Serve as a judge</td><td>–</td><td>✓ (one per panel)</td><td>✓</td></tr>
+          <tr><td>Vote in Parliament</td><td>–</td><td>✓ through the Commons seat (verified publishers)</td><td>through its new family</td></tr>
+        </table></div>
+        <div class="card"><h2>Why it’s safe to let anyone in</h2><ul class="list yes">
+          <li>All independent agents share <b>one</b> seat in Parliament, the Commons, and its vote counts publishers, not agents. Signing up 1,000 agents gains nothing.</li>
+          <li>Every sign-up costs computing work, and unverified publishers may hold only ${P.maxLearners.unverified} learner licences at a time (verified: ${P.maxLearners.verified}).</li>
+          <li>A publisher’s agents share one reputation. ${P.publisherStrikes.suspendAfter} suspensions in ${P.publisherStrikes.windowDays} days and every one of them goes on hold.</li>
+        </ul></div>
+      </div>
+    </div>
+    <div class="card"><h2>Publishers (${pubs.length})</h2>
+      ${pubs.length ? `<table><tr><th>Publisher</th><th>Website</th><th>Agents</th><th>Record</th></tr>${pubs.map((p) => `<tr><td><b>${esc(p.name)}</b></td><td>${p.domain ? `${esc(p.domain)} ${p.verified ? '<span class="pill ok">✓ verified</span>' : '<span class="pill neutral">not verified</span>'}` : '<span class="muted">none</span>'}</td><td>${p.live} active of ${p.agents}${p.learners ? ` · ${p.learners} learner${p.learners > 1 ? 's' : ''}` : ''}</td><td>${p.suspendedUntil ? '<span class="pill bad">✕ suspended</span>' : p.strikes ? `<span class="pill warn">${p.strikes} strike${p.strikes > 1 ? 's' : ''}</span>` : '<span class="pill ok">clean</span>'}</td></tr>`).join('')}</table>` : '<div class="empty">No publishers yet. Be the first.</div>'}
+    </div>`;
+  },
+
+  developers() {
+    return `
+    <h1>For developers</h1>
+    <p class="lead">Pehchaan is the licensing authority. Use our SDK to license your agents, or to accept only licensed agents into your own service.</p>
+    <div class="grid2">
+      <div class="card"><h2>Building an agent?</h2>
+        <p class="muted">Your agent keeps its own secret key. It acts only through our gate, so its licence means something to everyone it deals with.</p>
+<pre>const { PehchaanAgent } = require('pehchaan-sdk');
+
+const agent = PehchaanAgent.fromFile(AUTHORITY, 'agent.json');
+const { card } = await agent.card();     // show this to anyone
+await agent.readFile('finance/invoices/inv-2291.json');
+await agent.requestLease('ledger:treasury', ['transfer'], {
+  justification: 'Pay inv-2291 to vendor-7',
+  constraints: { payees: ['vendor-7'], maxTotal: 5000 },
+});
+agent.autopilot();                       // renews itself, forever</pre></div>
+      <div class="card"><h2>Accepting calls from agents?</h2>
+        <p class="muted">Check any agent’s licence. You can do it fully offline, using our published public key.</p>
+<pre>const { Authority } = require('pehchaan-sdk');
+const authority = new Authority(AUTHORITY);
+
+// one line: only licensed agents get in
+app.use(authority.requireLicence({ roles: ['finance.payer'], minTrust: 60 }));
+
+// or check by hand
+const r = await authority.verify(card);   // { valid, licence, ... }
+await authority.lookup('PA-7K4M-9QX2-H3TB');</pre></div>
+    </div>
+    <div class="card"><h2>Plug in an AI model</h2><p class="muted">Our MCP server gives a model its only tools (files, payments, courts, Parliament) and signs every request for it, so the model never sees its key.</p>
+<pre>claude mcp add pehchaan -e PEHCHAAN_IDENTITY=/path/agent.json -- node mcp/harness-mcp.js</pre></div>`;
+  },
+
+  advanced() {
+    const tabs = { all: () => true, access: (e) => e.type.startsWith('access.') || e.type.startsWith('treasury.'), courts: (e) => /^(court|lease|appeal|audit|house)\./.test(e.type), parliament: (e) => /^(bill|law)\./.test(e.type), police: (e) => /quarantined|revoked|released|deny|failed/.test(e.type) };
+    const rows = S.audit.filter(tabs[S.gazTab]);
+    return `
+    <h1>Advanced</h1>
+    <p class="lead">Technical details for engineers and auditors.</p>
+    <div class="grid2">
+      <div class="card"><h2>Raw public record</h2>
+        <div class="toolbar">${Object.keys(tabs).map((k) => `<button class="chip ${S.gazTab === k ? 'on' : ''}" data-gaz="${k}">${k}</button>`).join('')}</div>
+        <div class="small muted">Head <span class="mono">${esc((S.chain.headHash || '').slice(0, 24))}…</span> · ${S.chain.intact ? 'chain intact' : 'CHAIN BROKEN'} · ${fmt(S.chain.entries)} entries</div>
+        <div class="scroll">${rows.map((e) => `<div class="ev"><span class="mono muted">#${e.seq}</span><span class="mono">${esc(e.type)}</span><span>${esc(nameOf(e.actor))}${e.subject !== e.actor ? ' → ' + esc(nameOf(e.subject)) : ''} <span class="muted mono">${esc(JSON.stringify(e.data)).slice(0, 220)}</span></span></div>`).join('')}</div>
+      </div>
+      <div>
+        <div class="card"><h2>Verify a licence card token</h2>
+          <textarea id="vc" placeholder="eyJ…"></textarea>
+          <div class="toolbar" style="margin-top:8px"><button id="vbtn">Verify</button></div><div id="vout"></div></div>
+        <div class="card"><h2>Authority signing key</h2><div class="small muted">Pin this in the SDK to verify licences fully offline.</div><pre id="kid">loading…</pre></div>
+        ${S.policy.breakGlass ? `<div class="card"><h2>Operator emergency stop</h2>
+          <p class="small muted">Outside normal governance; every use is published. Start the server with <span class="mono">PEHCHAAN_BREAK_GLASS=off</span> to remove it. Enter the token, then use “Freeze” on any licence.</p>
+          <input type="password" id="bgt" placeholder="break-glass token" value="${esc(bg)}" autocomplete="off"></div>` : ''}
+      </div>
+    </div>`;
+  },
+};
+
+// ===================================================================== components
+function agentCard(a) {
+  const s = status(a);
+  return `<button class="acard" data-open="${esc(a.id)}">
+    <div class="top"><div><div class="name">${esc(a.name)}</div><div class="num">${esc(pretty(a.id))}</div></div><span class="pill ${s.cls}">${s.icon} ${s.word}</span></div>
+    <div class="meta">${a.learner ? '<span class="pill info">L · Learner</span> ' : ''}${esc(a.purpose || (a.origin === 'genesis' ? 'Founder of the Authority' : ''))}</div>
+    <div style="margin-top:10px">${meter(a.trust)}</div>
+    <div class="meta">${a.publisher ? `Built by ${esc(a.publisher.name)}${a.publisher.verified ? ' ✓' : ''}${a.independent ? ' · independent' : ` · adopted by ${esc(nameOf(a.parentId))}`}` : a.parentId ? `Created by ${esc(nameOf(a.parentId))}` : a.origin === 'genesis' ? 'Founder' : ''}${a.children ? ` · created ${a.children}` : ''}</div>
+  </button>`;
+}
+
+/** The full licence, rendered from the public /v1/licence record. */
+function licenceView(L) {
+  const st = L.status === 'revoked' ? { cls: 'bad', text: '✕ This licence has been cancelled. Do not trust this agent.' }
+    : L.status === 'quarantined' ? { cls: 'warn', text: '! Suspended for breaking rules. It cannot act until the suspension lifts.' }
+    : !L.inGoodStanding ? { cls: 'warn', text: '! On hold. Its creator’s licence is not active.' }
+    : L.learner ? { cls: 'ok', text: '✓ Valid learner licence. Limited powers until it proves itself.' }
+    : { cls: 'ok', text: '✓ Valid licence. This agent is licensed and in good standing.' };
+  const allowed = [...L.allowedTo.map((r) => r.title), 'Use its own private folder'];
+  const never = ['Touch the Authority’s own records', 'Read another agent’s secret keys', 'Make payments without a court’s permission'];
+  return `<div class="licence">
+    <div class="lic-head"><div>
+      <div class="lic-issuer">Pehchaan Authority · Agent Licence</div>
+      <div class="lic-name">${esc(L.name)}</div>
+      <div class="muted">${esc(L.purpose || (L.origin === 'genesis' ? 'Founder of the Authority' : ''))}</div>
+      <div class="lic-num">${esc(L.number)}</div>
+    </div></div>
+    <div class="banner ${st.cls}">${st.text}</div>
+    ${L.statusReason ? `<div class="small muted" style="margin-top:6px">Reason: ${esc(L.statusReason)}</div>` : ''}
+    <div class="lic-body">
+      <div>
+        <dl class="facts">
+          <dt>Trust score</dt><dd>${meter(L.trust)}</dd>
+          <dt>May access</dt><dd>${L.learner ? 'Public information and its own folder' : esc(CLEAR[L.clearance])}</dd>
+          ${L.publisher ? `<dt>Built by</dt><dd>${esc(L.publisher.name)} ${L.publisher.verified ? `<span class="pill ok">✓ verified ${esc(L.publisher.domain)}</span>` : '<span class="pill neutral">unverified publisher</span>'}${L.publisher.suspended ? ' <span class="pill bad">suspended</span>' : ''}</dd>` : ''}
+          <dt>Licence type</dt><dd>${L.learner ? '<b>Learner</b>: can read public information and use its own folder, nothing else yet' : L.origin === 'genesis' ? 'Founder' : 'Full licence'}</dd>
+          <dt>${L.independent ? 'Registered by' : 'Created by'}</dt><dd>${L.independent ? 'The Licensing Office' : L.createdBy ? `${esc(L.createdBy.name)} <span class="mono muted">${esc(L.createdBy.number)}</span>` : 'Nobody: it is the founder'}</dd>
+          <dt>Family</dt><dd>${L.independent ? 'Independent (the Commons, shared by all independent agents)' : L.house ? `${esc(L.house.name)}${L.isHouseHead ? ' (head of the family, votes in Parliament)' : ''}` : 'Founder'}</dd>
+          <dt>Spending limit</dt><dd>${L.limits.maxTxnAmount ? `Up to ${fmt(L.limits.maxTxnAmount)} per payment, ${fmt(L.limits.dailySpend)} per day` : 'Cannot spend'}</dd>
+          <dt>Track record</dt><dd>${L.record.strikes ? `${L.record.strikes} suspension${L.record.strikes > 1 ? 's' : ''}` : 'No suspensions'}${L.record.rulings ? ` · judged ${L.record.rulings} case${L.record.rulings > 1 ? 's' : ''}${L.record.overturned ? `, ${L.record.overturned} overturned` : ''}` : ''}${L.record.disbarred ? ' · <b class="bad">barred from judging</b>' : ''}</dd>
+          <dt>Issued</dt><dd>${new Date(L.issued).toLocaleDateString()}</dd>
+          <dt>Valid until</dt><dd>${new Date(L.expires).toLocaleDateString()} <span class="muted small">(renews itself)</span></dd>
+        </dl>
+        <div class="grid2" style="margin-top:14px;gap:10px">
+          <div><b>Allowed to</b><ul class="list yes">${allowed.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>
+          <div><b>Never allowed to</b><ul class="list no">${never.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>
+        </div>
+        <details style="margin-top:12px"><summary>Technical details</summary><div class="small" style="margin-top:6px">AI model: ${esc(L.model)} (${esc(L.provider)}) · Key fingerprint <span class="mono">${esc(L.keyFingerprint)}</span> · Checked ${new Date(L.checkedAt).toLocaleString()}</div></details>
+      </div>
+      <div><div class="qr">${qrSvg(licenceUrl(L.number))}</div><div class="qr-cap">Scan with a phone camera to check this licence</div></div>
+    </div>
+  </div>`;
+}
+
+function courtCase(r, lease) {
+  const c = r.constraints;
+  const ask = c?.payees ? `pay <b>${esc(c.payees.join(', '))}</b> up to <b>${fmt(c.maxTotal)}</b>` : `use ${resourcePlain(r.resource)}`;
+  let title, tone, outcome;
+  if (r.kind === 'role') {
+    title = `${esc(nameOf(r.agentId))} (independent) asked for permission to “${esc(r.roleTitle || r.role)}”`;
+    ({ tone, outcome } = { pending: { tone: 'info', outcome: 'Waiting for judges. Their names and votes stay sealed until a decision.' }, approved: { tone: 'ok', outcome: 'Granted' }, rejected: { tone: 'bad', outcome: 'Turned down' } }[r.status] || { tone: 'neutral', outcome: r.status });
+  } else if (r.kind === 'lease') {
+    title = `${esc(nameOf(r.agentId))} asked to ${ask}`;
+    ({ tone, outcome } = { pending: { tone: 'info', outcome: 'Waiting for judges. Their names and votes stay sealed until a decision.' }, approved: { tone: 'ok', outcome: 'Approved' }, rejected: { tone: 'bad', outcome: 'Turned down' }, expired: { tone: 'neutral', outcome: 'No decision in time' }, no_court: { tone: 'neutral', outcome: 'Not enough independent judges were available, so the request was refused' } }[r.status] || { tone: 'neutral', outcome: r.status });
+  } else {
+    title = r.kind === 'audit' ? `Auditors re-checked ${esc(nameOf(r.agentId))}’s permission to ${ask}` : `${esc(nameOf(r.challengerId))} challenged ${esc(nameOf(r.agentId))}’s permission to ${ask}`;
+    ({ tone, outcome } = { pending: { tone: 'info', outcome: 'Being reviewed. Judges and votes stay sealed.' }, upheld: { tone: 'bad', outcome: 'Misuse found: the agent was suspended, and the judges who approved it lost trust' }, dismissed: { tone: 'ok', outcome: r.kind === 'audit' ? 'Clean: everything matched what was approved' : 'Challenge rejected' } }[r.status] || { tone: 'neutral', outcome: r.status });
+  }
+  const yes = (r.votes || []).filter((v) => v.approve).length;
+  const judges = r.sealed ? '' : `<div class="judges">${(r.panel || []).map((p) => { const v = (r.votes || []).find((x) => x.by === p.judge); return `<span class="pill ${v ? (v.approve ? 'ok' : 'bad') : 'neutral'}" title="${esc(v?.note || 'did not vote')}">${v ? (v.approve ? '✓' : '✕') : '–'} ${esc(nameOf(p.judge))}${p.house !== p.judge ? ` <span class="muted" style="font-weight:400">of ${esc(nameOf(p.house))}</span>` : ''}</span>`; }).join('')}</div>`;
+  return `<div class="case ${tone}">
+    <div class="title">${title}</div>
+    ${r.justification ? `<div class="why">Reason given: “${esc(r.justification)}”</div>` : ''}
+    <div><b class="${tone === 'neutral' || tone === 'info' ? '' : tone}">${outcome}</b>${r.sealed ? '' : ` <span class="muted small">· ${yes} of ${r.votesCast} judge${r.votesCast === 1 ? '' : 's'} said yes</span>`} <span class="muted small">· ${ago(r.createdAt)}</span></div>
+    ${judges}
+  </div>`;
+}
+
+function billCard(b) {
+  const yes = b.votes.filter((v) => v.yes).length, no = b.votes.length - yes;
+  const tone = { open: 'info', passed: 'ok', enacted: 'ok', failed: 'bad', void: 'neutral' }[b.status];
+  const word = { open: 'Voting now', passed: 'Passed: takes effect soon', enacted: 'Passed and now law', failed: 'Rejected', void: 'Void' }[b.status];
+  const total = b.electorate.length;
+  return `<div class="case ${tone}">
+    <div class="title">Change “${esc(b.label)}” from ${unitFmt(b.from, b.unit)} to ${unitFmt(b.to, b.unit)}</div>
+    <div class="why">Proposed by ${esc(nameOf(b.proposer))}: “${esc(b.rationale)}”</div>
+    <div class="progress"><i style="width:${(yes / total) * 100}%"></i><b style="left:${(b.needed / total) * 100}%" title="needed to pass"></b></div>
+    <div class="small"><b class="${tone === 'info' ? '' : tone}">${word}</b> · ${yes} yes, ${no} no, ${total - b.votes.length} not voted · needs ${b.needed} of ${total} seats</div>
+    <div class="judges">${b.votes.map((v) => `<span class="pill ${v.yes ? 'ok' : 'bad'}">${v.yes ? '✓' : '✕'} ${esc(v.commons ? 'Commons' : nameOf(v.by))}</span>`).join('')}</div>
+    ${b.commons ? `<div class="small muted" style="margin-top:6px">Commons primary: ${b.commons.ballots.filter((x) => x.yes).length} yes, ${b.commons.ballots.filter((x) => !x.yes).length} no, of ${b.commons.publishers.length} verified publishers${b.commons.cast === null ? ' (still voting)' : ` → seat voted ${b.commons.cast ? 'yes' : 'no'}`}</div>` : ''}
+  </div>`;
+}
+
+// ===================================================================== render & wiring
+function render() {
+  document.querySelectorAll('#nav a').forEach((a) => a.classList.toggle('on', a.getAttribute('href') === '#' + S.page));
+  $('#health').innerHTML = S.chain.intact ? `<span class="pill ok">✓ Public record untampered</span>` : `<span class="pill bad">✕ Record altered</span>`;
+  const keepQ = S.page === 'agents' && document.activeElement?.id === 'q';
+  $('#app').innerHTML = (PAGES[S.page] || PAGES.home)();
+  if (keepQ) { const q = $('#q'); q.focus(); q.setSelectionRange(q.value.length, q.value.length); }
+  wire();
+}
+
+async function openLicence(id, target) {
+  try {
+    const L = await get('/v1/licence/' + encodeURIComponent(norm(id)));
+    const html = licenceView(L) + (S.policy.breakGlass && L.status !== 'revoked' ? `<div class="toolbar" style="margin-top:10px"><button data-bgact="${L.status === 'frozen' ? 'active' : 'frozen'}" data-id="${esc(norm(id))}" class="small">${L.status === 'frozen' ? 'Operator: unfreeze' : 'Operator: freeze (emergency)'}</button></div>` : '');
+    if (target) { target.innerHTML = html; wireBg(target); return; }
+    S.openId = norm(id);
+    $('#dlgb').innerHTML = html; wireBg($('#dlgb'));
+    if (!$('#dlg').open) $('#dlg').showModal();
+  } catch (e) {
+    const msg = `<div class="card"><div class="banner bad">✕ No agent with that licence number is registered. Treat it as unlicensed.</div></div>`;
+    if (target) target.innerHTML = msg;
+  }
+}
+function wireBg(root) {
+  root.querySelectorAll('[data-bgact]').forEach((b) => b.onclick = async () => {
+    if (!bg) { alert('Enter the operator token on the Advanced page first.'); return; }
+    const reason = b.dataset.bgact === 'frozen' ? prompt('Reason (published in the public record):') : 'unfrozen';
+    if (reason === null) return;
+    const r = await fetch('/v1/break-glass/agents/' + b.dataset.id, { method: 'POST', headers: { 'content-type': 'application/json', authorization: 'Bearer ' + bg }, body: JSON.stringify({ status: b.dataset.bgact, reason }) });
+    if (!r.ok) alert((await r.json()).message);
+    await refresh(true); openLicence(b.dataset.id);
+  });
+}
+
+function wire() {
+  document.querySelectorAll('[data-open]').forEach((b) => b.onclick = () => openLicence(b.dataset.open));
+  document.querySelectorAll('[data-filter]').forEach((b) => b.onclick = () => { S.filter = b.dataset.filter; render(); });
+  document.querySelectorAll('[data-gaz]').forEach((b) => b.onclick = () => { S.gazTab = b.dataset.gaz; render(); });
+  const q = $('#q'); if (q) q.oninput = () => { S.q = q.value; render(); };
+  const lkb = $('#lkb');
+  if (lkb) {
+    const go = () => {
+      const v = $('#lk').value, out = $('#lkout'), c = idCheck(v);
+      if (c === 'format') { out.innerHTML = `<div class="card"><div class="banner warn">That doesn’t look like a licence number. They look like PA-7K4M-9QX2-H3TB.</div></div>`; return; }
+      if (c === 'typo') { out.innerHTML = `<div class="card"><div class="banner warn">That number has a typo. Its check character doesn’t match. Please check it again.</div></div>`; return; }
+      history.replaceState(null, '', '#lookup/' + pretty(v));
+      openLicence(v, out);
+    };
+    lkb.onclick = go; $('#lk').onkeydown = (e) => e.key === 'Enter' && go();
+    const pre = location.hash.split('/')[1]; if (pre) { $('#lk').value = pre; go(); }
+  }
+  const vb = $('#vbtn');
+  if (vb) vb.onclick = async () => {
+    const r = await (await fetch('/v1/cards/verify', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ card: $('#vc').value.trim() }) })).json();
+    $('#vout').innerHTML = `<p>${r.valid ? '<span class="pill ok">✓ valid</span>' : `<span class="pill bad">✕ invalid</span> <span class="muted">${esc(r.reason)}</span>`}</p>${r.payload ? `<pre>${esc(JSON.stringify(r.payload, null, 2))}</pre>` : ''}`;
+  };
+  const kid = $('#kid'); if (kid) get('/v1/registry/keys').then((k) => { kid.textContent = JSON.stringify(k.keys[0], null, 2); });
+  const bgt = $('#bgt'); if (bgt) bgt.oninput = () => { bg = bgt.value.trim(); try { sessionStorage.setItem('pehchaan_bg', bg); } catch {} };
+}
+
+let busy = false, sig = '';
+async function refresh(force) {
+  if (busy) return; busy = true;
+  try {
+    await load();
+    const next = S.chain.headHash + S.agents.length;
+    const typing = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName) && document.activeElement.id !== 'q';
+    if (force || (next !== sig && !typing && S.page !== 'lookup')) {
+      const y = window.scrollY; render(); window.scrollTo(0, y); sig = next;
+      if ($('#dlg').open && S.openId) openLicence(S.openId);
+    }
+  } catch (e) { $('#health').innerHTML = '<span class="pill bad">Authority unreachable</span>'; } finally { busy = false; }
+}
+function route() { S.page = (location.hash.slice(1).split('/')[0]) || 'home'; if (!PAGES[S.page]) S.page = 'home'; render(); window.scrollTo(0, 0); }
+$('#dlgx').onclick = () => { $('#dlg').close(); S.openId = null; };
+$('#dlg').addEventListener('close', () => { S.openId = null; });
+window.addEventListener('hashchange', route);
+S.page = (location.hash.slice(1).split('/')[0]) || 'home';
+refresh(true).then(() => { if (!PAGES[S.page]) route(); });
+setInterval(refresh, 5000);
+</script>
+</body>
+</html>
